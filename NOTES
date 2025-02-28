@@ -1,0 +1,29 @@
+NOTES FOR KUBERNETES.
+
+1. What is Kubernetes?
+Kubernetes is an open-source platform that helps in deploying, managing, and scaling containerized applications automatically. It ensures that applications run smoothly without manual intervention, even if some parts fail.
+
+2. What is a Pod?
+A Pod is the smallest unit in Kubernetes. It contains one or more containers that share storage, network, and configurations. If a Pod fails, Kubernetes replaces it automatically.
+
+3. What is Deployment?
+A Deployment manages a group of Pods. It helps in creating, updating, and scaling applications automatically. If something goes wrong, it allows easy rollback to a previous version.
+
+4. What is Rollout?
+A Rollout is the process of updating a Deployment. Kubernetes gradually replaces old Pods with new ones to prevent downtime. If an update fails, you can roll back to the previous version.
+
+5. What is Replication Controller?
+A Replication Controller ensures a fixed number of Pods are always running. If a Pod crashes, it creates a new one. However, it is deprecated and replaced by ReplicaSet.
+
+6. What is ReplicaSet?
+A ReplicaSet is an improved version of Replication Controller. It ensures the desired number of Pods are running and supports more flexible Pod selection. Deployments use ReplicaSets internally.
+
+Difference Between Replication Controller and ReplicaSet in Kubernetes
+1. Replication Controller (Old)
+Replication Controller ensures that a specified number of Pod replicas are running at all times. If a Pod crashes or is deleted, the Replication Controller automatically creates a new one to maintain the desired state. However, it only supports equality-based selectors (e.g., key=value), which limits its flexibility.
+
+2. ReplicaSet (New & Recommended)
+ReplicaSet is the improved version of Replication Controller. It provides the same functionality but supports both equality-based and set-based selectors (matchLabels, matchExpressions). This allows for more advanced selection and filtering of Pods.
+
+3. What Should You Use Today?
+Instead of using ReplicaSet directly, it is best to use Deployments, which internally use ReplicaSets to manage Pods. Deployments provide automatic rolling updates, rollbacks, and scaling.
