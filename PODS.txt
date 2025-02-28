@@ -1,0 +1,77 @@
+
+
+# Kubernetes Pod Setup Guide 
+1. Installing `kubectl` on Ubuntu  
+Run the following commands to install `kubectl`:  
+sudo apt-get update
+sudo apt-get install -y kubectl
+
+2. Understanding Pods in Kubernetes  
+Pods are the smallest deployable units of computing that you can create and manage in Kubernetes. A Pod is group of one or more containers,
+with shared storage and network resources, and a specification for how to run the containers.
+
+3. Creating a Pod Using a YAML File  
+Step 1: Create the `pod.yml` File  
+Run the following command to create a new file:  
+
+vim pod.yml
+
+Step 2: Add the Following YAML Configuration
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.14.2
+    ports:
+    - containerPort: 80
+```
+
+**Step 3: Save and Exit**  
+
+**4. Explanation of `pod.yml` File**  
+
+| **Section**       | **Description** |
+|------------------|----------------------------------------------------|
+| `apiVersion: v1`  | Specifies the Kubernetes API version (v1). |
+| `kind: Pod`       | Defines the resource type as a **Pod**. |
+| `metadata`        | Contains metadata such as the Pod **name** (`nginx`). |
+| `spec`            | Specifies the **configuration** of the Pod. |
+| `containers`      | A list of containers inside the Pod. |
+| `name: nginx`     | Names the container as **`nginx`**. |
+| `image: nginx:1.14.2` | Specifies the **Docker image** to use (`nginx v1.14.2`). |
+| `ports`           | Defines the **ports** exposed by the container. |
+| `containerPort: 80` | The container serves traffic on **port 80**. |
+
+---
+
+5. Deploying the Pod in Kubernetes  
+
+Step 1: Apply the YAML File  
+Run the following command to create the Pod:  
+
+kubectl apply -f pod.yml
+
+
+Step 2: Verify the Pod Status  
+Check if the Pod is running:  
+
+kubectl get pods
+
+**Expected Output:**
+```
+NAME    READY   STATUS    RESTARTS   AGE
+nginx   1/1     Running   0          10s
+```
+
+Step 3: Get Detailed Information About the Pod 
+
+kubectl describe pod nginx
+
+6. Deleting the Pod (If Needed)  
+
+kubectl delete pod nginx
+
+
