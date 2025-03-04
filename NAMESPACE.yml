@@ -1,0 +1,50 @@
+Kubernetes Namespaces
+
+A **Kubernetes Namespace** is a virtual cluster inside a physical cluster. It helps organize and isolate resources for different teams, projects, or environments.
+
+## **1️⃣ Creating a Namespace**
+A namespace allows us to group related resources together.
+
+### **YAML Example**
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev
+
+Commands
+  kubectl apply -f namespace.yaml
+kubectl get namespaces
+
+2️⃣ Setting Default Namespace for Kubectl
+By default, kubectl interacts with the default namespace. To switch
+kubectl config set-context --current --namespace=dev
+kubectl config view --minify | grep namespace
+To switch back:
+kubectl config set-context --current --namespace=default
+
+3️⃣ Creating Pods in a Specific Namespace
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pod
+  namespace: dev
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+
+apply
+kubectl apply -f test-pod.yaml
+kubectl get pods -n dev
+
+4️⃣ Viewing Resources in a Namespace
+kubectl get pods --namespace=dev
+kubectl get all -n dev
+
+5️⃣ Deleting a Namespace
+kubectl delete namespace dev
+    
+    
+
+    
