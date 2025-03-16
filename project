@@ -1,0 +1,164 @@
+How to launch basic nginx app on kubernetes cluster and access it using node port.
+
+First, create your HTML file:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Monitor Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #1e1e2f;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .clock {
+            font-size: 1.8em;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .fact-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            font-size: 1.2em;
+            transition: transform 0.3s ease;
+        }
+
+        .fact-box:hover {
+            transform: scale(1.05);
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            background: #ff4757;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #e84118;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 Cloud Monitoring Dashboard</h1>
+        <p>📡 Live System Stats & Fun Facts</p>
+
+        <div class="clock" id="clock">⏳ Loading time...</div>
+
+        <div class="fact-box" id="factBox">💡 Click below for a fun cloud fact!</div>
+        
+        <button onclick="showFact()">Get a Cloud Fact</button>
+    </div>
+
+    <script>
+        function updateClock() {
+            let now = new Date();
+            let timeString = now.toLocaleTimeString();
+            document.getElementById("clock").innerText = "🕒 " + timeString;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function showFact() {
+            const facts = [
+                "☁️ Cloud computing started in the 1960s!",
+                "🚀 Kubernetes means 'helmsman' in Greek!",
+                "🖥️ AWS launched EC2 in 2006, revolutionizing cloud hosting.",
+                "🔗 The first container technology was LXC (2008), before Docker!",
+                "📊 94% of enterprises use cloud computing today!"
+            ];
+            let randomFact = facts[Math.floor(Math.random() * facts.length)];
+            document.getElementById("factBox").innerText = randomFact;
+        }
+    </script>
+</body>
+</html>
+
+
+  this is html code save it.
+
+  Now create a ConfigMap from this HTML file:
+kubectl create configmap nginx-html --from-file=index.html
+
+Create the nginx-deployment.yaml file:
+vim nginx-deployment.yaml
+and paste this 
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: html-volume
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: html-volume
+        configMap:
+          name: nginx-html
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  type: NodePort
+  selector:
+    app: nginx
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 32222  # Keep this as your fixed port
+
+      Now apply the deployment:
+      kubectl apply -f nginx-deployment.yaml
+
+Then open in a browser:
+http://<WorkerNodePublicIP>:32222
+
+ and the job is done!!!!!!!!
