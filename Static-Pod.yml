@@ -1,0 +1,94 @@
+
+
+## 🧱 Static Pod – Super Simple Example
+
+### 🧠 Imagine this:
+
+You want to run an **nginx web server** on your machine (the Kubernetes node), and you **don’t use `kubectl`** to create it.
+
+Instead, you just **drop a file** in a special folder, and *boom!* it runs automatically.
+
+That’s what a **static pod** is.
+
+---
+
+### 🛠️ Step-by-Step Example:
+
+#### ✅ Step 1: Check the folder where static pods live
+
+> On most systems, it’s:
+```
+/etc/kubernetes/manifests
+```
+
+This is a *special folder*. Anything you put here as a pod YAML file will run automatically.
+
+---
+
+#### ✅ Step 2: Create a file in that folder
+
+Open a terminal on your node and do:
+
+```bash
+sudo nano /etc/kubernetes/manifests/nginx-static-pod.yaml
+```
+
+Then paste this content:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-static-nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    ports:
+    - containerPort: 80
+```
+
+Save and exit.
+
+---
+
+#### ✅ Step 3: kubelet sees the file and starts the pod
+
+You didn’t run any command like `kubectl apply`.  
+But if you run:
+
+```bash
+kubectl get pods -A
+```
+
+You’ll see:
+
+```
+default   my-static-nginx   Running
+```
+
+---
+
+#### ✅ Step 4: Want to delete it?
+
+You **don’t use `kubectl delete`**. That won’t work!
+
+Instead, you do:
+
+```bash
+sudo rm /etc/kubernetes/manifests/nginx-static-pod.yaml
+```
+
+And kubelet will stop the pod.
+
+---
+
+## 🎯 Summary:
+
+| Feature        | Static Pod                     |
+|----------------|--------------------------------|
+| Created by     | You, via a file in a folder    |
+| Folder         | `/etc/kubernetes/manifests`    |
+| Controlled by  | kubelet (not the control plane)|
+| Use case       | System-level or guaranteed pods|
+
