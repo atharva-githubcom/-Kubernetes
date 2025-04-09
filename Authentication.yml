@@ -1,0 +1,36 @@
+🔐 What is Authentication in Kubernetes?
+Authentication is about who you are when you try to access the Kubernetes cluster.
+
+Just like logging in to a system — Kubernetes checks if you are a valid user before letting you do anything.
+
+🧠 Think of it Like This:
+Imagine you walk up to a door (Kubernetes API server).
+Before you go in, the security guard (API server) asks:
+
+“Who are you? Show me your ID.”
+
+That’s authentication.
+
+✅ Types of Authentication in Kubernetes
+Here are the most common types:
+
+Type	Description	Example
+Client Certs	You log in using an SSL certificate	kubectl with certs in kubeconfig
+Bearer Tokens	A long token string used as a password	Often used for service accounts
+Username/Pass	Not common for production	Basic auth (mostly for testing)
+OIDC	External login like Google, GitHub	Used with enterprise SSO
+Service Account	For pods to access the API	Automatically mounted in pods
+🔧 How Do You Authenticate?
+You normally use a kubeconfig file like this:
+
+bash
+Copy
+Edit
+kubectl get pods
+Behind the scenes, kubectl looks at:
+
+Who you are (user)
+
+How to prove it (cert or token)
+
+What cluster you're connecting to
