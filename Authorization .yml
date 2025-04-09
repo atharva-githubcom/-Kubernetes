@@ -1,0 +1,112 @@
+
+
+## 🔐 What is Authorization in Kubernetes?
+
+**Authorization** is about **what you’re allowed to do** in the Kubernetes cluster — after your identity is confirmed.
+
+---
+
+### 🧠 Simple Analogy:
+
+Imagine you’ve shown your ID (Authentication ✅)  
+Now the guard checks your **permissions**:
+
+> “Okay, you're John. Are you allowed to enter the control room?”
+
+That’s **Authorization**.
+
+---
+
+## ✅ Example
+
+- You run:  
+  ```bash
+  kubectl delete pod nginx-pod
+  ```
+
+- Kubernetes checks:
+  - Are you authenticated? (Who are you?)
+  - Are you **authorized** to delete pods in this namespace?
+
+---
+
+## 🛠️ Types of Authorization in Kubernetes
+
+| Method             | Description                                              |
+|--------------------|----------------------------------------------------------|
+| **RBAC** (most used) | Role-Based Access Control — define who can do what     |
+| ABAC               | Attribute-Based Access Control (less common)             |
+| Webhook            | External systems decide authorization                    |
+| Node Authorization | For kubelet nodes only                                   |
+
+---
+
+## 🔧 RBAC – Role-Based Access Control
+
+This is the most popular method.
+
+You create:
+
+### 1. **Role** or **ClusterRole**  
+Defines **what actions** are allowed.
+
+```yaml
+kind: Role
+metadata:
+  namespace: default
+  name: pod-reader
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list"]
+```
+
+---
+
+### 2. **RoleBinding** or **ClusterRoleBinding**  
+Links a user/service account to the Role.
+
+```yaml
+kind: RoleBinding
+metadata:
+  name: read-pods
+  namespace: default
+subjects:
+- kind: User
+  name: dev-user
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
+```
+
+This means:  
+🔐 `dev-user` can **get and list pods** in the `default` namespace.
+
+---
+
+## 🔍 How to Check What You Can Do
+
+```bash
+kubectl auth can-i delete pods --namespace=default
+```
+
+Output:
+```
+yes
+```
+or
+```
+no
+```
+
+---
+
+## 🎯 Summary
+
+| Concept         | Description                              |
+|------------------|------------------------------------------|
+| Authentication  | Who you are                              |
+| Authorization   | What you are allowed to do               |
+| RBAC            | Common method for authorization           |
+| Can I check     | Use `kubectl auth can-i`                  |
