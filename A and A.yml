@@ -1,0 +1,171 @@
+Absolutely! Here's a clean **step-by-step guide** to set up **user authentication + RBAC authorization** in Kubernetes using **client certificates**:
+
+---
+
+## 🔐 Kubernetes Auth & RBAC – Step-by-Step Guide
+
+### ✅ Goal:
+Create a new user `dev-user`, authenticate using a client certificate, and authorize with limited pod access.
+
+---
+
+## ⚙️ 1. Generate Certificate Key Pair for `dev-user`
+
+```bash
+openssl genrsa -out dev-user.key 2048
+```
+
+---
+
+## 📝 2. Generate Certificate Signing Request (CSR)
+
+```bash
+openssl req -new -key dev-user.key -out dev-user.csr -subj "/CN=dev-user/O=dev-group"
+```
+
+---
+
+## 🔏 3. Sign the CSR with Kubernetes CA (as root/admin)
+
+```bash
+openssl x509 -req -in dev-user.csr \
+  -CA /etc/kubernetes/pki/ca.crt \
+  -CAkey /etc/kubernetes/pki/ca.key \
+  -CAcreateserial \
+  -out dev-user.crt \
+  -days 365
+```
+
+---
+
+## 🧩 4. Configure `kubectl` to use the new user
+
+```bash
+kubectl config set-credentials dev-user \
+  --client-certificate=dev-user.crt \
+  --client-key=dev-user.key \
+  --embed-certs=true
+```
+
+---
+
+## 🌐 5. Create a new context for `dev-user`
+
+```bash
+kubectl config set-context dev-user-context \
+  --cluster=kubernetes \
+  --namespace=default \
+  --user=dev-user
+```
+
+---
+
+## 🔀 6. Switch to the `dev-user` context
+
+```bash
+kubectl config use-context dev-user-context
+```
+
+Test access:
+```bash
+kubectl get pods
+```
+⚠️ You’ll see a **Forbidden** error — this is good! It means auth works but RBAC is denying access.
+
+---
+
+## 👑 7. Switch back to admin context to apply RBAC
+
+First, list contexts:
+```bash
+kubectl config get-contexts
+```
+
+Then switch back to admin context (replace the context name as needed):
+
+```bash
+kubectl config use-context kubernetes-admin@kubernetes
+```
+
+---
+
+## 📜 8. Create RBAC Role and RoleBinding
+
+### `dev-user-role.yaml`
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: default
+  name: pod-reader
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+```
+
+Apply it:
+```bash
+kubectl apply -f dev-user-role.yaml
+```
+
+---
+
+### `dev-user-rolebinding.yaml`
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pod-reader-binding
+  namespace: default
+subjects:
+- kind: User
+  name: dev-user
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
+```
+
+Apply it:
+```bash
+kubectl apply -f dev-user-rolebinding.yaml
+```
+
+---
+
+## 🚀 9. Test as `dev-user`
+
+Switch back:
+```bash
+kubectl config use-context dev-user-context
+kubectl get pods
+```
+
+✅ You should see the pod list now.
+
+---
+
+## 🔧 10. (Optional) Add More Permissions
+
+Want to let `dev-user` delete pods?
+
+Edit `dev-user-role.yaml`:
+```yaml
+verbs: ["get", "list", "watch", "delete"]
+```
+
+Then re-apply:
+```bash
+kubectl apply -f dev-user-role.yaml
+```
+
+---
+
+Let me know if you want to try:
+- Cluster-wide permissions
+- Access to other resources (Deployments, Services, etc.)
+- Setting up via CSR API instead of OpenSSL
+
+I'll tailor it for your scenario!
